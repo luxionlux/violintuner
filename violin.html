@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #Division1 {
+            float: left;
+            width: 35%;
+            height: 100%;
+            background-color: #CECED2;
+
+        }
+
+        #Division2 {
+            float: left;
+            width: 65%;
+            height: 100%;
+            background-image: url("background2.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        html,
+        body,
+        #Wrapper {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+
+    <script>
+        let audioContext;
+        let mic;
+        let pitch;
+
+        async function setup() {
+            audioContext = new AudioContext();
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            startPitch(stream, audioContext);
+        }
+        setup();
+
+        function startPitch(stream, audioContext) {
+            pitch = ml5.pitchDetection('./model/', audioContext, stream, modelLoaded);
+        }
+
+        function modelLoaded() {
+            document.querySelector('#status').textContent = 'Model Loaded';
+            getPitch();
+        }
+
+        function getPitch() {
+            pitch.getPitch(function (err, frequency) {
+                if (frequency) {
+                    document.querySelector('#Frequency').textContent = frequency;
+                } else {
+                    document.querySelector('#Frequency').textContent = 'No pitch detected';
+                }
+                getPitch();
+            })
+        }
+
+    </script>
+
+
+</head>
+
+<body>
+
+    <div id="Wrapper">
+        <div id="Division1">
+            <p>First Division</p>
+        </div>
+        <div id="Division2">
+            <p>Second Division</p>
+            <div id="Frequency"></div>
+        </div>
+    </div>
+
+</body>
+
+
+<footer>
+
+</footer>
+
+</html>
