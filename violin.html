@@ -4,6 +4,10 @@
 <head>
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+    </style>
+
+    <style>
         body {
             margin: 0;
             padding: 0;
@@ -21,7 +25,7 @@
             float: left;
             width: 65%;
             height: 100%;
-            background-image: url("background2.jpg");
+            background-image: url("violinbg.jpg");
             background-size: cover;
             background-repeat: no-repeat;
         }
@@ -32,39 +36,70 @@
             height: 100%;
             width: 100%;
         }
+
+        * {
+            font-family: 'Playfair Display', serif;
+        }
+
+        #Frequency {
+            font-size: x-large;
+        }
     </style>
 
     <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
 
     <script>
+
+        const A4 = 440
+        const C0 = A4 * Math.pow(2, -4.75)
+
+        const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
         let audioContext;
-        let mic;
+        let stream;
         let pitch;
 
+        function freqtopitch(freq) {
+            let h = Math.round(12 * Math.log2(freq / C0))
+            let octave = Math.floor(h / 12);
+            let n = h % 12
+            return notes[n] + octave
+        }
+
+
         async function setup() {
-            audioContext = new AudioContext();
             stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
             startPitch(stream, audioContext);
         }
-        setup();
+
+        function playAudioStream() {
+            audioContext = new AudioContext();
+            setup();
+
+            setInterval(() => {
+                document.getElementById('Frequency').innerText = getPitch();
+            }, 20);
+        }
 
         function startPitch(stream, audioContext) {
             pitch = ml5.pitchDetection('./model/', audioContext, stream, modelLoaded);
         }
 
         function modelLoaded() {
-            document.querySelector('#status').textContent = 'Model Loaded';
+            document.getElementById('status').innerText = 'Model Loaded';
             getPitch();
         }
 
         function getPitch() {
             pitch.getPitch(function (err, frequency) {
                 if (frequency) {
-                    document.querySelector('#Frequency').textContent = frequency;
+                    document.getElementById('Frequency').innerHTML = freqtopitch(frequency);
+                    console.log(frequency);
+                    return frequency;
                 } else {
-                    document.querySelector('#Frequency').textContent = 'No pitch detected';
+                    document.getElementById('Frequency').innerHTML = "<br>";
                 }
-                getPitch();
             })
         }
 
@@ -77,11 +112,16 @@
 
     <div id="Wrapper">
         <div id="Division1">
-            <p>First Division</p>
+            <div
+                style="height: 35%; width: 80%; margin-left:auto; margin-right:auto; margin-top: 10%; border: #dbdfe7; border-style: solid; border-width: 6px; text-align: center; display: table ">
+                <h1 style="color: #838383; display: table-cell; vertical-align: middle; text-align: center; font-size: 40pt">
+                    Violin Tuner</h1>
+            </div>
         </div>
         <div id="Division2">
-            <p>Second Division</p>
             <div id="Frequency"></div>
+            <button id="play" onclick="playAudioStream()">Start</button>
+            <div id="status"></div>
         </div>
     </div>
 
