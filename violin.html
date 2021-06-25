@@ -60,6 +60,8 @@
         let stream;
         let pitch;
 
+        var pitchInterval;
+
         function freqtopitch(freq) {
             let h = Math.round(12 * Math.log2(freq / C0))
             let octave = Math.floor(h / 12);
@@ -74,12 +76,18 @@
         }
 
         function playAudioStream() {
-            audioContext = new AudioContext();
-            setup();
+            if (document.getElementById("play").innerText == "Start") {
+                document.getElementById("play").innerText = "Stop";
+                audioContext = new AudioContext();
+                setup();
 
-            setInterval(() => {
-                document.getElementById('Frequency').innerText = getPitch();
-            }, 20);
+                pitchInterval = setInterval(() => {
+                    document.getElementById('Frequency').innerText = getPitch();
+                }, 20);
+            } else {
+                document.getElementById("play").innerText = "Start";
+                clearInterval(pitchInterval);
+            }
         }
 
         function startPitch(stream, audioContext) {
@@ -87,7 +95,7 @@
         }
 
         function modelLoaded() {
-            document.getElementById('status').innerText = 'Model Loaded';
+            document.getElementById('status').innerText = 'The tuner is ready to be used!';
             getPitch();
         }
 
@@ -114,9 +122,15 @@
         <div id="Division1">
             <div
                 style="height: 35%; width: 80%; margin-left:auto; margin-right:auto; margin-top: 10%; border: #dbdfe7; border-style: solid; border-width: 6px; text-align: center; display: table ">
-                <h1 style="color: #838383; display: table-cell; vertical-align: middle; text-align: center; font-size: 40pt">
-                    Violin Tuner</h1>
+                <p
+                    style="color: #080707; display: table-cell; vertical-align: middle; text-align: center; font-size: 40pt">
+                    Violin Tuner
+                </p>
             </div>
+            <p style="margin-left: 5%; margin-right: 5%; text-align: center; font-size: 18pt">
+                This free violin tuner uses your microphone to record the sound produced by your violin. It will tell
+                you the note you're playing and the accuracy from said note, so you can tune your violin.
+            </p>
         </div>
         <div id="Division2">
             <div id="Frequency"></div>
@@ -125,11 +139,10 @@
         </div>
     </div>
 
+
+
 </body>
 
 
-<footer>
-
-</footer>
 
 </html>
